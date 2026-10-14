@@ -1,0 +1,20 @@
+services:
+  custom_cloud:
+    build:
+      context: .
+      args:
+        NEXTCLOUD_VERSION: ${NEXTCLOUD_VERSION}
+    image: custom_cloud:${NEXTCLOUD_VERSION}-${IMAGE_VERSION}
+    container_name: custom_cloud
+    ports:
+      - "80:80"
+    environment:
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: changeme123
+      NEXTCLOUD_TRUSTED_DOMAINS: localhost
+      SQLITE_DATABASE: cloud_database
+    volumes:
+      - custom_cloud_data:/var/www/html
+
+volumes:
+  custom_cloud_data:
