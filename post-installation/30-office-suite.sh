@@ -5,8 +5,5 @@ set -e
 
 occ() { php /var/www/html/occ "$@"; }
 
-# Connector app
-occ app:install richdocuments
 
-# Built-in Collabora server
-occ app:install richdocumentscode
+php /var/www/html/occ app:enable fileslibreofficeedit
