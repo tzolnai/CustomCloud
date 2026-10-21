@@ -1,6 +1,6 @@
-ARG NEXTCLOUD_VERSION=34
+ARG NEXTCLOUD_VERSION=34.0.3
 
-# Have an own build of fileslibreofficeedit so we can patch it
+# Create a patched, custom build of fileslibreofficeedit
 FROM node:20 AS appbuild
 ARG APP_VERSION=v2.0.1
 RUN git clone --depth 1 --branch ${APP_VERSION} \
@@ -11,6 +11,7 @@ RUN git apply /tmp/adapt_to_new_file_action_API.patch
 RUN npm ci && npm run build
 RUN rm -rf node_modules .git appinfo/signature.json
 
+# Building the actual nextcloud image
 FROM nextcloud:${NEXTCLOUD_VERSION}-apache
 
 RUN apt-get update \
@@ -29,3 +30,10 @@ COPY branding/ /branding/
 
 # Install patched app
 COPY --from=appbuild --chown=www-data:www-data /app/fileslibreofficeedit /usr/src/nextcloud/custom_apps/fileslibreofficeedit
+
+# Patch core functionality: disable the "Open locally" file action
+ARG BASE_DIR="/usr/src/nextcloud"
+ARG FILES_INIT_BUNDLE="${BASE_DIR}/dist/files-init.js"
+
+RUN sed -i -E 's/\}(;async function [^}]*openlocaleditor)/,enabled:()=>!1}\1/' "${FILES_INIT_BUNDLE}" && \
+    test "$(grep -oE 'enabled:\(\)=>!1\};async function [^}]*openlocaleditor' "${FILES_INIT_BUNDLE}" | wc -l)" = 1
