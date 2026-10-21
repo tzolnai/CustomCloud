@@ -31,9 +31,14 @@ COPY branding/ /branding/
 # Install patched app
 COPY --from=appbuild --chown=www-data:www-data /app/fileslibreofficeedit /usr/src/nextcloud/custom_apps/fileslibreofficeedit
 
-# Patch core functionality: disable the "Open locally" file action
 ARG BASE_DIR="/usr/src/nextcloud"
+
+# Patch core functionality in JS file: disable the "Open locally" file action
 ARG FILES_INIT_BUNDLE="${BASE_DIR}/dist/files-init.js"
 
 RUN sed -i -E 's/\}(;async function [^}]*openlocaleditor)/,enabled:()=>!1}\1/' "${FILES_INIT_BUNDLE}" && \
     test "$(grep -oE 'enabled:\(\)=>!1\};async function [^}]*openlocaleditor' "${FILES_INIT_BUNDLE}" | wc -l)" = 1
+
+# Patch core functionality in PHP file: change how default avatar is created based on the user name
+COPY patches/change_avatar_text.patch /tmp/change_avatar_text.patch
+RUN patch -u ${BASE_DIR}/lib/private/Avatar/Avatar.php -i /tmp/change_avatar_text.patch
