@@ -9,7 +9,11 @@ WORKDIR /app/fileslibreofficeedit
 COPY patches/adapt_to_new_file_action_API.patch /tmp/adapt_to_new_file_action_API.patch
 RUN git apply /tmp/adapt_to_new_file_action_API.patch
 RUN npm ci && npm run build
-RUN rm -rf node_modules .git appinfo/signature.json
+
+# Create an unofficial, custom app
+COPY helloworld /app/helloworld
+WORKDIR /app/helloworld
+RUN npm ci && npm run build
 
 # Building the actual nextcloud image
 FROM nextcloud:${NEXTCLOUD_VERSION}-apache
@@ -31,13 +35,18 @@ COPY branding/ /branding/
 # Install patched app
 COPY --from=appbuild --chown=www-data:www-data /app/fileslibreofficeedit /usr/src/nextcloud/custom_apps/fileslibreofficeedit
 
+# Install an unofficial, custom app
+COPY --from=appbuild --chown=www-data:www-data /app/helloworld /usr/src/nextcloud/custom_apps/helloworld
+
 ARG BASE_DIR="/usr/src/nextcloud"
 
 # Patch core functionality in JS file: disable the "Open locally" file action
 ARG FILES_INIT_BUNDLE="${BASE_DIR}/dist/files-init.js"
+
 RUN sed -i -E 's/\}(;async function [^}]*openlocaleditor)/,enabled:()=>false}\1/' "${FILES_INIT_BUNDLE}" && \
     test "$(grep -oE 'enabled:\(\)=>false\};async function [^}]*openlocaleditor' "${FILES_INIT_BUNDLE}" | wc -l)" = 1
 
 # Patch core functionality in PHP file: change how default avatar is created based on the user name
 COPY patches/change_avatar_text.patch /tmp/change_avatar_text.patch
 RUN patch -u ${BASE_DIR}/lib/private/Avatar/Avatar.php -i /tmp/change_avatar_text.patch
+
