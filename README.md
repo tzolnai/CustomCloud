@@ -21,14 +21,14 @@ Rebuild container from scratch
 docker compose down -v && docker compose up -d --build && docker compose logs -f custom_cloud
 ```
 
-Rebuild prostges setup from scratch
+Rebuild postgres setup from scratch
 ```
-docker compose -f docker-compose-prostges.yml down -v  &&\
-docker compose -f docker-compose-prostges.yml up -d --build &&\
-docker compose -f docker-compose-prostges.yml logs -f custom_cloud
+docker compose -f docker-compose-postgres.yml down -v  &&\
+docker compose -f docker-compose-postgres.yml up -d --build &&\
+docker compose -f docker-compose-postgres.yml logs -f custom_cloud
 ```
 
-Rebuild prostges + redis setup from scratch
+Rebuild postgres + redis setup from scratch
 ```
 docker compose -f docker-compose-redis.yml down -v  &&\
 docker compose -f docker-compose-redis.yml up -d --build &&\
