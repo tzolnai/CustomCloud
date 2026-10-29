@@ -20,3 +20,10 @@ Rebuild container from scratch
 ```
 docker compose down -v && docker compose up -d --build && docker compose logs -f custom_cloud
 ```
+
+Rebuild prostges setup from scratch
+```
+docker compose -f docker-compose-prostges.yml down -v  &&\
+docker compose -f docker-compose-prostges.yml up -d --build &&\
+docker compose -f docker-compose-prostges.yml logs -f custom_cloud
+```
