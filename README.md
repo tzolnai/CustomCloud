@@ -27,3 +27,10 @@ docker compose -f docker-compose-prostges.yml down -v  &&\
 docker compose -f docker-compose-prostges.yml up -d --build &&\
 docker compose -f docker-compose-prostges.yml logs -f custom_cloud
 ```
+
+Rebuild prostges + redis setup from scratch
+```
+docker compose -f docker-compose-redis.yml down -v  &&\
+docker compose -f docker-compose-redis.yml up -d --build &&\
+docker compose -f docker-compose-redis.yml logs -f custom_cloud
+```
